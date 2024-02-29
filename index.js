@@ -1,4 +1,4 @@
-import express from "express";
+const express = require("express");
 // import { router as orderRouter } from "./routes/order.route.js";
 // import bodyParser from "body-parser";
 
@@ -16,3 +16,5 @@ app.get("/api/order", (req, res) => {
 app.listen(3000, () => {
   console.log("Running on port 3000.");
 });
+
+module.exports = app;
