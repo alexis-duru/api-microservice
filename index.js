@@ -1,4 +1,8 @@
-import express from "express";
+// import express from "express";
+// Add Express
+const express = require("express");
+
+// Initialize Express
 // import { router as orderRouter } from "./routes/order.route.js";
 // import bodyParser from "body-parser";
 
@@ -16,3 +20,5 @@ app.get("/api/order", (req, res) => {
 app.listen(3000, () => {
   console.log("Running on port 3000.");
 });
+
+module.exports = app;
