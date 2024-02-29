@@ -1,11 +1,11 @@
 import express from "express";
 // import { router as orderRouter } from "./routes/order.route.js";
-import bodyParser from "body-parser";
+// import bodyParser from "body-parser";
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
 
 app.get("/api/order", (req, res) => {
   res.send("PONG");
