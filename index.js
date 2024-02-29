@@ -1,17 +1,18 @@
-// Add Express
-const express = require("express");
+import express from "express";
+// import { router as orderRouter } from "./routes/order.route.js";
+// import bodyParser from "body-parser";
 
-// Initialize Express
 const app = express();
 
-// Create GET request
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+
 app.get("/api/order", (req, res) => {
   res.send("PONG");
 });
 
-// Initialize server
+// app.use("/api", orderRouter);
+
 app.listen(3000, () => {
   console.log("Running on port 3000.");
 });
-
-module.exports = app;
