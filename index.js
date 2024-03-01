@@ -4,6 +4,8 @@ const axios = require("axios").default;
 
 const app = express();
 
+const orders = {};
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -16,20 +18,12 @@ app.listen(3000, () => {
 });
 
 app.post("/api/order", async (req, res) => {
-  const status = "pending";
-
   productArray = req.body.products;
 
-  if (!availableProduct(productArray)) {
-    return res.status(400).json({
-      message: "Le produit n'est pas disponible à la commande",
-    });
-  }
-
   for (const product of productArray) {
-    const url = `https://api-stock.vercel.app/api/stock/${product.id}/movement`;
+    const reservationProduct = `https://api-stock.vercel.app/api/stock/${product.id}/movement`;
     try {
-      await axios.post("/user", {
+      await axios.post(reservationProduct, {
         productId: product.id,
         quantity: product.quantity,
         status: "Reserve",
@@ -39,18 +33,88 @@ app.post("/api/order", async (req, res) => {
     }
   }
 
+  // Réponse au client
   res.status(201).json({
     id: createRandomId(),
   });
 
-  function availableProduct(productArray) {
-    return productArray.some((product) => product.quantite > 0);
+  orders[createRandomId()] = productArray;
+
+  const NotificationShippingUrl = `http://microservices.tp.rjqu8633.odns.fr/api/shipping/`;
+  try {
+    await axios.post(NotificationShippingUrl, {
+      orderId: createRandomId(),
+      productArray: productArray,
+    });
+  } catch (error) {
+    console.log(error);
   }
 });
 
 function createRandomId() {
   return Math.floor(Math.random() * 1000);
 }
+
+// Get de la commande
+
+app.get("/api/order/:id", async (req, res) => {
+  const orderId = req.params.id;
+
+  const url = `http://microservices.tp.rjqu8633.odns.fr/api/order/${orderId}`;
+
+  try {
+    const response = await axios.get(url);
+    res.status(200).json(response.data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// Changement du statut de la commande
+
+app.put("/api/order/:id", async (req, res) => {
+  const orderId = req.params.id;
+  const status = req.body.status;
+
+  const url = `http://microservices.tp.rjqu8633.odns.fr/api/order/${orderId}`;
+
+  try {
+    await axios.put(url, {
+      status: status,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  res.status(200).json({
+    message: "La commande a été modifiée avec succès",
+  });
+});
+
+// app.post("/api/shipping", async (req, res) => {
+//   const orderId = req.body.orderId;
+//   const productArray = req.body.productArray;
+
+//   const totalQuantity = productArray.reduce(
+//     (acc, product) => acc + product.quantite,
+//     0
+//   );
+
+//   const url = `http://microservices.tp.rjqu8633.odns.fr/api/shipping/`;
+//   try {
+//     await axios.post(url, {
+//       orderId: orderId,
+//       nbProducts: totalQuantity,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+
+//   res.status(200).json({
+//     orderId: orderId,
+//     nbProducts: totalQuantity,
+//   });
+// });
 
 // app.put("/api/order/:id", (req, res) => {
 //   const orderId = req.params.id;
@@ -70,52 +134,6 @@ function createRandomId() {
 
 //   res.status(200).json({
 //     message: "La commande a été modifiée avec succès",
-//   });
-// });
-
-// app.post("/api/shipping", (req, res) => {
-//   const orderId = req.body.orderId;
-//   const productArray = req.body.productArray;
-
-//   if (orderId === 0) {
-//     return res.status(404).json({
-//       message: "La commande n'existe pas",
-//     });
-//   }
-
-//   const totalQuantity = productArray.reduce(
-//     (acc, product) => acc + product.quantite,
-//     0
-//   );
-
-//   res.status(200).json({
-//     orderId: orderId,
-//     totalQuantity: totalQuantity,
-//   });
-// });
-
-// app.get("/api/order/:id", (req, res) => {
-//   const orderId = req.params.id;
-
-//   if (orderId === "0") {
-//     return res.status(404).json({
-//       message: "La commande n'existe pas",
-//     });
-//   }
-
-//   res.status(200).json({
-//     orderId: orderId,
-//     status: "pending",
-//     productArray: [
-//       {
-//         productId: 1,
-//         quantite: 1,
-//       },
-//       {
-//         productId: 2,
-//         quantite: 0,
-//       },
-//     ],
 //   });
 // });
 
